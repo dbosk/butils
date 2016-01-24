@@ -1,0 +1,196 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[swedish,british]{babel}
+
+\usepackage{noweb}
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\smallbreak
+
+\usepackage{authblk}
+\usepackage{varioref}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalize]{cleveref}
+\usepackage{eurosym}
+
+\usepackage[natbib,style=alphabetic,maxbibnames=99]{biblatex}
+\addbibresource{bdiff.bib}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\theoremstyle{definition}
+\newtheorem{example}{Example}
+
+\usepackage{listings}
+\lstset{%
+  literate=%
+    {Ö}{{\"O}}1
+    {Ä}{{\"A}}1
+    {Å}{{\AA}}1
+    {å}{{\aa}}1
+    {ä}{{\"a}}1
+    {ö}{{\"o}}1
+    {é}{{\'e}}1
+    {è}{{\`e}}1,
+  language=,
+  numbers=left,
+  stepnumber=1,
+  escapeinside={*@}{@*}
+}
+
+\title{%
+  bdiff: A diff-like utility for account excerpts
+}
+\author{%
+  Daniel Bosk
+}
+%\affil{%
+%  \texttt{\href{http://daniel.bosk.se}{http://daniel.bosk.se}}
+%}
+\date{\today}
+
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We want to find differences between double-entry book-keeping reports that 
+should be synchronized, e.g.\ a bank statement and a budget.
+We solve this problem by abstracting the relevant data in the reports and using 
+a diff-like algorithm to find the differences.
+Due to the inexact matches that has to be made we use fuzzy comparisons.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+@
+
+
+\section{Introduction}
+\label{Introduction}
+
+We want to compare statements from different double-entry book-keeping systems 
+to be able to sync them, e.g.\ a bank statement and a budget.
+The data we are interested in are thus credits and debits.
+We are not interested in the relative ordering, but rather to match individual 
+statements.
+
+\begin{example}\label{MatchingStatements}
+We have two bank statements:
+\begin{lstlisting}
+2016-01-23 G20                -15.00 EUR
+2016-01-23 Marché des Lices   -10.00 EUR
+2016-01-24 G20                -5.00 EUR
+\end{lstlisting}
+and
+\begin{lstlisting}
+2016-01-25 MARCHEE DES LIC    -10.00 EUR
+2016-01-25 G20 CESSON         -15.00 EUR
+2016-01-26 G20 CESSON         -5.00 EUR
+\end{lstlisting}
+However, one is manually documented in the budget and has the dates on the 
+receipts (the top one), whereas the other is what is documented by the bank due 
+to their processing of payments (bottom one).
+Hence, the names and dates are not exactly the same, but a human can still 
+infer that they match.
+\end{example}
+
+We want to capture this matching possibility algorithmically.
+The main purpose of this program is to identify places where these two 
+statements differ.
+
+\begin{example}\label{UnmatchingStatements}
+Consider the following two two bank statements:
+\begin{lstlisting}
+2016-01-23 G20                -15.00 EUR
+2016-01-23 Marché des Lices   -10.00 EUR
+2016-01-24 G20                -5.00 EUR
+\end{lstlisting}
+and
+\begin{lstlisting}[firstnumber=0]
+2016-01-22 BRIVIN             -3.00 EUR
+2016-01-25 MARCHEE DES LIC    -10.00 EUR
+2016-01-25 G20 CESSON         -15.00 EUR
+2016-01-26 G20 CESSON         -5.00 EUR
+\end{lstlisting}
+We see that the first line is new from \cref{MatchingStatements}, and also that 
+this line has no matching.
+\end{example}
+
+
+\subsection{Program structure}
+\label{SrcStructure}
+
+We are implementing this program in Python 3.
+The main file is [[<<bdiff.py>>]] and it is structured as follows:
+<<bdiff.py>>=
+<<imports>>
+<<functions>>
+<<classes>>
+
+def main(argv):
+  <<main body>>
+
+if __name__ == "__main__":
+  sys.exit(main(sys.argv))
+@
+
+Due to this we have to add the [[sys]] module from Python:
+<<imports>>=
+import sys
+@
+
+
+\section{Data structure}
+\label{DataStructure}
+
+As we can see in \cref{MatchingStatements,UnmatchingStatements}, we can use the 
+amount and perhaps parts of the other data for making matchings.
+We will define an abstract data type for a statement line, containing either 
+a credit or a debit.
+Then we will have a factory object~\cite{DesignPatterns} create these abstract 
+statement lines.
+We need one factory per type of file we support, e.g.\ one for Swedbank's 
+exported statements and one for Credit Agricole's.
+Once we have two lists of abstract statements, we can pass them on to the 
+comparison algorithm in \cref{MatchingAlgorithm}.
+
+\subsection{An abstract representation}
+\label{AbstractRepresentation}
+
+\dots
+
+\subsection{Parsing Ledger reports}
+\label{ParsingLedger}
+
+We want to be able to parse the reports of the register command of the Ledger 
+utility~\cite{Ledger}.
+
+\subsection{Parsing Swedbank reports}
+\label{ParsingSwedbank}
+
+Swedbank allows exporting the bank statement in different formats.
+
+\subsection{Parsing CA reports}
+\label{ParsingCA}
+
+Credit Agricole allows exporting of bank statements in different formats.
+
+
+\section{A fuzzy matchmaking algorithm}
+\label{MatchingAlgorithm}
+
+\dots
+
+
+
+\section*{Acknowledgements}
+
+This code is available under the following BSD license:
+\begin{quote}
+  \input{LICENSE}
+\end{quote}
+
+
+\printbibliography{}
+\end{document}
