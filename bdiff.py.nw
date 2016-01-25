@@ -158,7 +158,13 @@ comparison algorithm in \cref{MatchingAlgorithm}.
 \subsection{An abstract representation}
 \label{AbstractRepresentation}
 
-\dots
+The minimum of attributes we need in the representation of an entry in an 
+account report is:
+\begin{itemize}
+\item date,
+\item description, and
+\item value.
+\end{itemize}
 
 \subsection{Parsing Ledger reports}
 \label{ParsingLedger}
