@@ -140,6 +140,13 @@ Due to this we have to add the [[sys]] module from Python:
 import sys
 @
 
+The overall idea is to first parse the command-line arguments and then process 
+them:
+<<main body>>=
+<<parse command-line arguments>>
+<<process command-line arguments>>
+@
+
 
 \section{Data structure}
 \label{DataStructure}
