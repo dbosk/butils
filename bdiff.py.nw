@@ -39,6 +39,8 @@
   escapeinside={*@}{@*}
 }
 
+\usepackage[defblank]{paralist}
+
 \title{%
   bdiff: A diff-like utility for account reports
 }
@@ -77,7 +79,7 @@ The data we are interested in are thus credits and debits.
 We are not interested in the relative ordering, but rather to match individual 
 statements.
 
-\begin{example}\label{MatchingStatements}
+\begin{example}\label{MatchingEntries}
 We have two bank statements:
 \begin{lstlisting}
 2016-01-23 G20                -15.00 EUR
@@ -101,7 +103,7 @@ We want to capture this matching possibility algorithmically.
 The main purpose of this program is to identify places where these two 
 statements differ.
 
-\begin{example}\label{UnmatchingStatements}
+\begin{example}\label{UnmatchingEntries}
 Consider the following two two bank statements:
 \begin{lstlisting}
 2016-01-23 G20                -15.00 EUR
@@ -115,7 +117,7 @@ and
 2016-01-25 G20 CESSON         -15.00 EUR
 2016-01-26 G20 CESSON         -5.00 EUR
 \end{lstlisting}
-We see that the first line is new from \cref{MatchingStatements}, and also that 
+We see that the first line is new from \cref{MatchingEntries}, and also that 
 this line has no matching.
 \end{example}
 
@@ -146,7 +148,7 @@ import sys
 \section{Data structure}
 \label{DataStructure}
 
-As we can see in \cref{MatchingStatements,UnmatchingStatements}, we can use the 
+As we can see in \cref{MatchingEntries,UnmatchingEntries}, we can use the 
 amount and perhaps parts of the other data for making matchings.
 We will define an abstract data type for a statement line, containing either 
 a credit or a debit.
@@ -160,7 +162,57 @@ comparison algorithm in \cref{MatchingAlgorithm}.
 \subsection{An abstract representation}
 \label{AbstractRepresentation}
 
-\dots
+The minimum of attributes we need in the representation of an entry in an 
+account report is:
+\begin{inparablank}
+\item date,
+\item description, and
+\item value.
+\end{inparablank}
+We will implement the entries as instantiations of a class [[Entry]]:
+<<classes>>=
+class Entry:
+  <<Entry methods>>
+@ We will need a constructor which initialized all the required attributes from 
+given arguments:
+<<Entry methods>>=
+def __init__(self, date, desc, value):
+  self.date = date
+  self.desc = desc
+  self.value = value
+@
+
+We will further need overloaded methods for some operations.
+We will start with equality, two entries are equal if all attributes are equal:
+<<Entry methods>>=
+def __eq__(self, other):
+  return ( self.date == other.date and
+    self.desc == other.desc and
+    self.value == other.value )
+@
+
+Next we would like the ability to sort the entries.
+For this we should implement the [[__lt__]] method.
+We want to sort first on the dates, then on the description and lastly on the 
+value.
+To do this we simply compare the attributes in the correct order:
+<<sort two entries>>=
+if self.date == other.date:
+  if self.desc == other.desc:
+    return self.value < other.value
+  return self.desc < other.desc
+return self.date < other.date
+@
+
+Finally, we also need to make a matching between two entries.
+These matchings are for comparing similar but not equal entries, as in 
+\cref{MatchingEntries}.
+We will define a method here, but describe its implementation
+([[<<compute matching score for two entries>>]]) in \cref{MatchingAlgorithm}.
+<<Entry methods>>=
+def match(self, other):
+  <<compute matching score for two entries>>
+@
 
 \subsection{Parsing Ledger reports}
 \label{ParsingLedger}
