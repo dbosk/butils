@@ -39,6 +39,8 @@
   escapeinside={*@}{@*}
 }
 
+\usepackage[defblank]{paralist}
+
 \title{%
   bdiff: A diff-like utility for account excerpts
 }
@@ -160,11 +162,55 @@ comparison algorithm in \cref{MatchingAlgorithm}.
 
 The minimum of attributes we need in the representation of an entry in an 
 account report is:
-\begin{itemize}
+\begin{inparablank}
 \item date,
 \item description, and
 \item value.
-\end{itemize}
+\end{inparablank}
+We will implement the entries as instantiations of a class [[Entry]]:
+<<classes>>=
+class Entry:
+  <<Entry methods>>
+@ We will need a constructor which initialized all the required attributes from 
+given arguments:
+<<Entry methods>>=
+def __init__(self, date, desc, value):
+  self.date = date
+  self.desc = desc
+  self.value = value
+@
+
+We will further need overloaded methods for some operations.
+We will start with equality, two entries are equal if all attributes are equal:
+<<Entry methods>>=
+def __eq__(self, other):
+  return ( self.date == other.date and
+    self.desc == other.desc and
+    self.value == other.value )
+@
+
+Next we would like the ability to sort the entries.
+For this we should implement the [[__lt__]] method.
+We want to sort first on the dates, then on the description and lastly on the 
+value.
+To do this we simply compare the attributes in the correct order:
+<<sort two entries>>=
+if self.date == other.date:
+  if self.desc == other.desc:
+    return self.value < other.value
+  return self.desc < other.desc
+return self.date < other.date
+@
+
+Finally, we also need to make a matching between two entries.
+These matchings are for comparing similar but not equal entries, as in 
+\cref{MatchingEntries}.
+We will define a method here, but describe its implementation
+([[<<compute matching score for two entries>>]]) in \cref{MatchingAlgorithm}.
+<<Entry methods>>=
+def match(self, other):
+  <<compute matching score for two entries>>
+@
 
 \subsection{Parsing Ledger reports}
 \label{ParsingLedger}
