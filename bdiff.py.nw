@@ -235,27 +235,61 @@ Credit Agricole allows exporting of bank statements in different formats.
 \section{A fuzzy matchmaking algorithm}
 \label{MatchingAlgorithm}
 
-We first implement a matching between two entries. The result of the matching 
-between the two entries is a distance score between those two. The distance 
-score is the sum of the distances between its components for each attribute. 
-This way the two entries are equal if they get the distance score 0, i.e. if 
-all the attributes match.
+We want to design an algorithm that can capture the matching outlined in 
+\cref{MatchingEntries,UnmatchingEntries} above.
+We will first implement a metric for how well two entries match.
+Will will do this by defining a distance between them,
+[[<<compute Entry distance for two entries>>]] mentioned above.
+The next step is to match entries in one left-hand-side report (a list) against 
+entries in another right-hand-side report (list).
+The result is a matching matrix where the rows are entries from the 
+left-hand-side list and the columns are entries in the right-hand-side list.  
+Basically, the minimums for rows and columns are the best matchings.
 
-The components are computed as follows: The distance between the values is the 
-absolute value of their arithmetic difference.
+\subsection{Distance between entries}
+
+The distance is the sum of the distances between its components, i.e.\ the 
+attributes.
+<<return Entry distance>>=
+return distance_date + distance_desc + distance_val
+@ This way the two entries are equal if they get the distance 0, i.e.\ if all 
+the attributes have distance 0 and are thus equal.
+Possibly it is interesting to weight the different components, but this might 
+require some measurements to determine.
+
+The components are computed as follows.
+The distance between the values is the absolute value of their arithmetic 
+difference.
+<<compute Entry distance for two entries>>=
+distance_value = math.abs(self.value - other.value)
+@ This also requires the [[math]] module:
+<<imports>>=
+import math
+@
 
 The distance between the dates is the difference in days.
+<<compute Entry distance for two entries>>=
+distance_date = math.abs(self.date - other.date)
+@
 
-The distance between the descriptions are a bit more complex. We work with them 
-as case-insensitive. If one is a sub-string of the other, the distance is 0.
+The distance between the descriptions is a bit more complex.
+We want the distance to be case insensitive, e.g.: usually the names in 
+Swedbank's descriptions are all upper case, whereas entries in Ledger are 
+capitalized or lower case.
+Further, the entries in Ledger are usually shorter than those in Swedbank or 
+CA, e.g.: the entry in Ledger will read \enquote{KFC} whereas it will read 
+\enquote{KFC CESSON} in CA.
+Based on this, if one is a sub-string of the other, the distance should be 0:
+<<compute Entry distance for two entries>>=
+if self.desc in other.desc or other.desc in self.desc:
+  distance_desc = 0
+else:
+  <<compute distance of descriptions>>
+@
 
-Possibly it is interesting to weight the different components.
+\subsection{A distance matrix}
 
-The next step is to match entries in one left-hand-side list against entries in 
-another right-hand-side list. The result is a matching matrix where the rows 
-are entries from the left-hand-side list and the columns are entries in the 
-right-hand-side list. Basically we can find the minimums for rows and columns, 
-those are the best matchings.
+\dots
 
 
 
