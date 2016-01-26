@@ -44,6 +44,8 @@
 }
 \author{%
   Daniel Bosk
+  \and
+  Mitra Damghanian
 }
 %\affil{%
 %  \texttt{\href{http://daniel.bosk.se}{http://daniel.bosk.se}}
@@ -180,7 +182,27 @@ Credit Agricole allows exporting of bank statements in different formats.
 \section{A fuzzy matchmaking algorithm}
 \label{MatchingAlgorithm}
 
-\dots
+We first implement a matching between two entries. The result of the matching 
+between the two entries is a distance score between those two. The distance 
+score is the sum of the distances between its components for each attribute. 
+This way the two entries are equal if they get the distance score 0, i.e. if 
+all the attributes match.
+
+The components are computed as follows: The distance between the values is the 
+absolute value of their arithmetic difference.
+
+The distance between the dates is the difference in days.
+
+The distance between the descriptions are a bit more complex. We work with them 
+as case-insensitive. If one is a sub-string of the other, the distance is 0.
+
+Possibly it is interesting to weight the different components.
+
+The next step is to match entries in one left-hand-side list against entries in 
+another right-hand-side list. The result is a matching matrix where the rows 
+are entries from the left-hand-side list and the columns are entries in the 
+right-hand-side list. Basically we can find the minimums for rows and columns, 
+those are the best matchings.
 
 
 
