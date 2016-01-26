@@ -204,14 +204,15 @@ if self.date == other.date:
 return self.date < other.date
 @
 
-Finally, we also need to make a matching between two entries.
-These matchings are for comparing similar but not equal entries, as in 
+Finally, we also need to compare similar but not equal entries, as in 
 \cref{MatchingEntries}.
+We will do this by computing the distance between the two entries.
 We will define a method here, but describe its implementation
-([[<<compute matching score for two entries>>]]) in \cref{MatchingAlgorithm}.
+([[<<compute distance for two entries>>]]) in \cref{MatchingAlgorithm}.
 <<Entry methods>>=
-def match(self, other):
-  <<compute matching score for two entries>>
+def distance(self, other):
+  <<compute Entry distance for two entries>>
+  <<return Entry distance>>
 @
 
 \subsection{Parsing Ledger reports}
