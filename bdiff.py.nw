@@ -4,6 +4,8 @@
 \usepackage[swedish,british]{babel}
 
 \usepackage{noweb}
+% Needed to relax penalty for breaking code chunks across pages, otherwise 
+% there might be a lot of space following a code chunk.
 \def\nwendcode{\endtrivlist \endgroup}
 \let\nwdocspar=\smallbreak
 
@@ -144,8 +146,33 @@ The overall idea is to first parse the command-line arguments and then process
 them:
 <<main body>>=
 <<parse command-line arguments>>
-<<process command-line arguments>>
+<<compute bdiff>>
+@ It is in the processing that we actually run the main algorithm.
+To parse command-line arguments we will make use of Python's
+[[argparse]] \cite{argparse}.
+So we will need
+<<imports>>=
+import argparse
 @
+
+The parsing will be divided into two steps:
+<<parse command-line arguments>>=
+<<parse arguments>>
+<<process arguments>>
+@ We will use [[parse arguments]] to set up the [[argparse]] data structure, 
+i.e.\ first let
+<<parse arguments>>=
+argp = argparse.ArgumentParser( \
+  description = "Compute differences between account reports." )
+@ Then we will use the [[<<process arguments>>]] for the processing step, i.e.\ 
+when we actually read the command-line and act on its options.
+We simply parse [[argv]] and get a Python dictionary containing the variables 
+we specify in [[<<parse arguments>>]]:
+<<process arguments>>=
+args = vars( argp.parse_args(argv[1:]) )
+@ So for each feature we want, we simply add to the [[argparse]] data structure
+using [[<<parse arguments>>]] and then what we should do for that option in 
+[[<<process arguments>>]].
 
 
 \section{Data structure}
